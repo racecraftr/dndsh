@@ -1,18 +1,26 @@
-use std::io::{self, Write};
+use std::sync::Arc;
 
+mod cmd;
 mod parser;
 mod state;
-mod cmd;
+mod completer;
+use completer::DndshCompleter;
+use linefeed::{self, Interface, ReadResult};
 use parser::{ParseResult, parse};
 use state::State;
 
 fn main() {
-    let mut input = String::new();
+    _ = repl();
+}
+
+fn repl() -> std::io::Result<()> {
+
     let mut shell_state = State::default();
-    'run: loop {
-        print!("dndsh> ");
-        io::stdout().flush().unwrap();
-        io::stdin().read_line(&mut input).unwrap();
+
+    let reader = Interface::new("my-repl")?;
+    reader.set_prompt("dndsh> ")?;
+    reader.set_completer(Arc::new(DndshCompleter));
+    'run: while let ReadResult::Input(input) = reader.read_line()? {
         let parse_result = parse(&input, &mut shell_state);
         match parse_result {
             ParseResult::Exit => {
@@ -26,8 +34,9 @@ fn main() {
             ParseResult::InvalidCmd(s) => println!("Invalid command: {}", s),
             ParseResult::InvalidArgs(s) => println!("Invalid arguments: {}", s),
         }
-        input.clear();
     }
+
+    Ok(())
 }
 
 #[cfg(test)]

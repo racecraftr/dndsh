@@ -23,7 +23,7 @@ enum CheckType {
 ///     - `-a`, which means to roll with advantage. This means that 2d20 are rolled, and
 ///     the one with the higher roll is counted.
 ///     - `-d`, which means to roll with disadvantage. This means that 2d20 are rolled, and
-///     the one with the lower roll is counted. 
+///     the one with the lower roll is counted.
 ///
 /// For more information on this,
 /// see the [official guide](https://5thsrd.org/rules/abilities/ability_checks/).
@@ -36,8 +36,8 @@ pub fn check(arg: &str, opts: Option<Vec<&String>>) -> ParseResult {
         let dc = caps.get(2).unwrap().as_str().parse::<u128>().unwrap();
         let mut check_type = CheckType::Normal;
 
-        if opts.is_some() {
-            for opt in opts.unwrap() {
+        if let Some(opts) = opts{
+            for opt in opts {
                 match opt.as_str() {
                     "-a" => check_type = CheckType::Advantage,
                     "-d" => check_type = CheckType::Disadvantage,
